@@ -1,0 +1,9 @@
+name: itemsearch
+author: cheetah
+version: 1.0
+api-version: 1.19
+main: com.github.fckngcheetah.itemsearch.SearchPlugin
+commands:
+  search:
+    description: Search for a material in all loaded chests and player inventories.
+    usage: §cPlease use /search <MATERIAL>
