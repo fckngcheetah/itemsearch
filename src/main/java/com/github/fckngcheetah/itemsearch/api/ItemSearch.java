@@ -1,42 +1,41 @@
 package com.github.fckngcheetah.itemsearch.api;
 
-import com.github.fckngcheetah.itemsearch.SearchPlugin;
-import org.bukkit.*;
-import org.bukkit.block.Block;
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 public class ItemSearch {
-    private Material material;
+    private final Material material;
 
-    public ItemSearch(Material material) {
+    public ItemSearch(final Material material) {
         this.material = material;
     }
 
     // TODO: Re-Implement async logic
     // As of now uses the main thread
-    public CompletableFuture<Chest[]> findChests(World world) {
-        CompletableFuture<Chest[]> foundChestsFuture = new CompletableFuture<>();
-        ArrayList<Chest> foundChests = new ArrayList<>();
-        ArrayList<CompletableFuture<Void>> chunkProcessor = new ArrayList<>();
+    public CompletableFuture<Chest[]> findChests(final World world) {
+        final CompletableFuture<Chest[]> foundChestsFuture = new CompletableFuture<>();
+        final ArrayList<Chest> foundChests = new ArrayList<>();
+        final ArrayList<CompletableFuture<Void>> chunkProcessor = new ArrayList<>();
 
-        for (Chunk chunk : world.getLoadedChunks()) {
-            BlockState[] blockStates = chunk.getTileEntities();
+        for (final Chunk chunk : world.getLoadedChunks()) {
+            final BlockState[] blockStates = chunk.getTileEntities();
 
-            for (BlockState blockState : chunk.getTileEntities()) {
+            for (final BlockState blockState : chunk.getTileEntities()) {
                 if (
-                        blockState.getType() == Material.CHEST ||
-                                blockState.getType() == Material.TRAPPED_CHEST
+                        Material.CHEST == blockState.getType() ||
+                                Material.TRAPPED_CHEST == blockState.getType()
                 ) {
-                    Chest chest = (Chest) blockState.getBlock().getState();
+                    final Chest chest = (Chest) blockState.getBlock().getState();
 
-                    if (chest.getBlockInventory().contains(material)) {
+                    if (chest.getBlockInventory().contains(this.material)) {
                         foundChests.add(chest);
                     }
                 }
@@ -49,15 +48,15 @@ public class ItemSearch {
     // Does not use the main thread
     public CompletableFuture<Player[]> findPlayers() {
         return CompletableFuture.supplyAsync(() -> {
-            ArrayList<Player> foundPlayers = new ArrayList<>();
+            final ArrayList<Player> foundPlayers = new ArrayList<>();
 
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                if (player.getInventory().contains(material)) {
+            for (final Player player : Bukkit.getOnlinePlayers()) {
+                if (player.getInventory().contains(this.material)) {
                     foundPlayers.add(player);
                 }
             }
 
-            Player[] players = foundPlayers.toArray(new Player[0]);
+            final Player[] players = foundPlayers.toArray(new Player[0]);
 
             return players;
         });

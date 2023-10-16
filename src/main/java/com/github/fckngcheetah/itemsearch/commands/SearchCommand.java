@@ -21,8 +21,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class SearchCommand implements TabExecutor {
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (!(sender instanceof Player)) {
+    public boolean onCommand(@NotNull final CommandSender sender, @NotNull final Command command, @NotNull final String label, @NotNull final String[] args) {
+        if (!(sender instanceof final Player player)) {
             sender.sendMessage(
                     Component.text("Please use this command as a player.")
                             .color(NamedTextColor.RED)
@@ -30,21 +30,19 @@ public class SearchCommand implements TabExecutor {
             return true;
         }
 
-        Player player = (Player) sender;
-
         if (!player.hasPermission("itemsearch.search")) {
             player.sendMessage(Bukkit.permissionMessage());
             return false;
         }
 
-        if (args.length != 1) {
+        if (1 != args.length) {
             return false;
         }
 
-        String materialName = args[0].toUpperCase();
-        Material material = Material.getMaterial(materialName);
+        final String materialName = args[0].toUpperCase();
+        final Material material = Material.getMaterial(materialName);
 
-        if (material == null) {
+        if (null == material) {
             player.sendMessage(
                     Component.text(materialName + " is not a valid material.")
                             .color(NamedTextColor.RED)
@@ -52,20 +50,20 @@ public class SearchCommand implements TabExecutor {
             return true;
         }
 
-        ItemSearch itemSearch = new ItemSearch(material);
-        CompletableFuture<Chest[]> chestFuture = itemSearch.findChests(player.getWorld());
-        CompletableFuture<Player[]> playerFuture = itemSearch.findPlayers();
+        final ItemSearch itemSearch = new ItemSearch(material);
+        final CompletableFuture<Chest[]> chestFuture = itemSearch.findChests(player.getWorld());
+        final CompletableFuture<Player[]> playerFuture = itemSearch.findPlayers();
 
         CompletableFuture.allOf(
                 chestFuture,
                 playerFuture
         ).thenRun(() -> {
-            Chest[] foundChests;
-            Player[] foundPlayers;
+            final Chest[] foundChests;
+            final Player[] foundPlayers;
             try {
                 foundChests = chestFuture.get();
                 foundPlayers = playerFuture.get();
-            } catch (Exception exception) {
+            } catch (final Exception exception) {
                 player.sendMessage(
                         Component.text("There was an error while searching.")
                                 .color(NamedTextColor.RED)
@@ -79,11 +77,11 @@ public class SearchCommand implements TabExecutor {
                             ChatColor.GREEN + foundPlayers.length + " inventories" +
                             ChatColor.GRAY + "."
             );
-            TextComponent showChestsComponent = Component.text("[Show chests]")
+            final TextComponent showChestsComponent = Component.text("[Show chests]")
                     .color(NamedTextColor.GREEN)
                     .clickEvent(ClickEvent.callback((audience) -> {
-                        for (Chest chest : foundChests) {
-                            String coordinateString = chest.getLocation().getBlockX() + " " +
+                        for (final Chest chest : foundChests) {
+                            final String coordinateString = chest.getLocation().getBlockX() + " " +
                                     chest.getLocation().getBlockY() + " " +
                                     chest.getLocation().getBlockZ();
                             player.sendMessage(
@@ -97,10 +95,10 @@ public class SearchCommand implements TabExecutor {
                             );
                         }
                     }));
-            TextComponent showInventoriesComponent = Component.text("[Show inventories]")
+            final TextComponent showInventoriesComponent = Component.text("[Show inventories]")
                     .color(NamedTextColor.GREEN)
                     .clickEvent(ClickEvent.callback((audience) -> {
-                        for (Player foundPlayer : foundPlayers) {
+                        for (final Player foundPlayer : foundPlayers) {
                             player.sendMessage(
                                     Component.text("» " + foundPlayer.getName() + " ")
                                             .color(NamedTextColor.GRAY)
@@ -127,7 +125,7 @@ public class SearchCommand implements TabExecutor {
     }
 
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public @Nullable List<String> onTabComplete(@NotNull final CommandSender sender, @NotNull final Command command, @NotNull final String label, @NotNull final String[] args) {
         return null;
     }
 }
